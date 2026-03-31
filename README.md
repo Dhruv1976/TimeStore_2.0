@@ -6,7 +6,7 @@ A full-stack e-commerce application for selling watches online with user authent
 
 ## 🚀 Live Demo & Testing Credentials
 
-**Deployment Link**: https://timestore-2.vercel.app/
+**Deployment Link**: https://timestore-2.vercel.app
 
 ### Admin Testing Account
 - **Email**: admin@gmail.com
