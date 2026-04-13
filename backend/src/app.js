@@ -17,8 +17,6 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-    maxAge: 3600, // Cache preflight (for 3600 seconds)
-    optionsSuccessStatus: 200
 }));
 
 app.use(express.json({ limit: '16kb' }));
