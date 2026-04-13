@@ -96,7 +96,7 @@ export const removeItemFromCart = (productId) => async (dispatch) => {
 
 export const updateCartItemQuantity = (productId, quantity) => async (dispatch) => {
     try {
-        const cartData = await apiClient.patch(`/cart/${productId}`, { quantity });
+        const cartData = await apiClient.put(`/cart/${productId}`, { quantity });
         dispatch(setCart(mapCartData(cartData)));
     } catch (error) {
         throw error;

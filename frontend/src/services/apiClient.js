@@ -48,6 +48,14 @@ const apiClient = {
     });
   },
 
+  put(endpoint, body) {
+    const isFormData = body instanceof FormData;
+    return this.request(endpoint, { 
+      method: "PUT", 
+      body: isFormData ? body : JSON.stringify(body) 
+    });
+  },
+
   delete(endpoint) {
     return this.request(endpoint, { method: "DELETE" });
   }

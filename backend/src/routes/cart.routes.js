@@ -4,13 +4,13 @@ import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.use(verifyJWT); // All routes require auth
+router.use(verifyJWT);
 
 router.post("/", addToCart);
 router.get("/", getCart);
-router.delete("/:productId", removeFromCart);
 router.put("/:productId", updateCartItem);
 router.delete("/clear", clearCart);
+router.delete("/:productId", removeFromCart);
 
 export default router;
 
