@@ -2,6 +2,31 @@ import { loginSuccess, logout, authInitialized } from './slices/authSlice';
 import { setCart, clearCart, updateQuantity } from './slices/cartSlice';
 import apiClient from '../services/apiClient';
 
+const cartUpdateQueue = {
+    isProcessing: false,
+    queue: [],
+    async add(task) {
+        this.queue.push(task);
+        if (!this.isProcessing) {
+            await this.process();
+        }
+    },
+    async process() {
+        if (this.isProcessing || this.queue.length === 0) return;
+        
+        this.isProcessing = true;
+        while (this.queue.length > 0) {
+            const task = this.queue.shift();
+            try {
+                await task();
+            } catch (error) {
+                console.error('Cart update error:', error);
+            }
+        }
+        this.isProcessing = false;
+    }
+};
+
 const mapCartData = (cartData) => ({
     items: cartData.items.map(item => ({
         id: item.productId._id || item.productId,
@@ -71,27 +96,41 @@ export const fetchCart = () => async (dispatch) => {
 };
 
 export const addItemToCart = (productId, quantity = 1, price, title, image) => async (dispatch) => {
-    try {
-        const cartData = await apiClient.post('/cart', {
-            productId,
-            quantity,
-            price,
-            title,
-            image
-        });
-        dispatch(setCart(mapCartData(cartData)));
-    } catch (error) {
-        throw error;
-    }
+    // Add to queue to ensure sequential processing
+    await cartUpdateQueue.add(async () => {
+        try {
+            const cartData = await apiClient.post('/cart', {
+                productId,
+                quantity,
+                price,
+                title,
+                image
+            });
+            dispatch(setCart(mapCartData(cartData)));
+        } catch (error) {
+            console.error('Failed to add to cart:', error);
+            throw error;
+        }
+    });
 };
 
 export const removeItemFromCart = (productId) => async (dispatch) => {
-    try {
-        const cartData = await apiClient.delete(`/cart/${productId}`);
-        dispatch(setCart(mapCartData(cartData)));
-    } catch (error) {
-        throw error;
-    }
+    // Add to queue to ensure sequential processing
+    await cartUpdateQueue.add(async () => {
+        try {
+            const cartData = await apiClient.delete(`/cart/${productId}`);
+            dispatch(setCart(mapCartData(cartData)));
+        } catch (error) {
+            console.error('Failed to remove from cart:', error);
+            // Refetch cart on error to sync state
+            try {
+                const cartData = await apiClient.get('/cart');
+                dispatch(setCart(mapCartData(cartData)));
+            } catch (refetchError) {
+                console.error('Failed to refetch cart:', refetchError);
+            }
+        }
+    });
 };
 
 export const updateCartItemQuantity = (productId, quantity) => async (dispatch) => {
@@ -104,14 +143,24 @@ export const updateCartItemQuantity = (productId, quantity) => async (dispatch) 
 };
 
 export const updateCartItemQuantityOptimistic = (productId, quantity) => async (dispatch) => {
-    dispatch(updateQuantity({ id: productId, quantity }));
-    
-    try {
-        const cartData = await apiClient.put(`/cart/${productId}`, { quantity });
-        dispatch(setCart(mapCartData(cartData)));
-    } catch (error) {
-        console.error('Failed to update cart quantity:', error);
-    }
+    // Add to queue to ensure sequential processing
+    await cartUpdateQueue.add(async () => {
+        dispatch(updateQuantity({ id: productId, quantity }));
+        
+        try {
+            const cartData = await apiClient.put(`/cart/${productId}`, { quantity });
+            dispatch(setCart(mapCartData(cartData)));
+        } catch (error) {
+            console.error('Failed to update cart quantity:', error);
+            // Refetch cart on error to sync state
+            try {
+                const cartData = await apiClient.get('/cart');
+                dispatch(setCart(mapCartData(cartData)));
+            } catch (refetchError) {
+                console.error('Failed to refetch cart:', refetchError);
+            }
+        }
+    });
 };
 
 export const clearUserCart = () => async (dispatch) => {
