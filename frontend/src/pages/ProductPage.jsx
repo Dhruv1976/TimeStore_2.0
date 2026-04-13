@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addItem } from "../store/slices/cartSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addItemToCart } from "../store/actions";
 import apiClient from "../services/apiClient";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ProductPage = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -60,7 +61,25 @@ const ProductPage = () => {
     else if (type === "dec" && quantity > 1) setQuantity(prev => prev - 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.info("Please login to add items to cart", {
+        position: "top-right",
+        autoClose: 5000,
+        style: {
+          background: "#ffffff",
+          color: "#000000",
+          fontWeight: "500",
+          border: "1px solid #e5e7eb",
+          borderRadius: "0.5rem",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+        },
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
+
     if (!product.stock || product.stock <= 0) {
       toast.error("This product is out of stock", {
         position: "top-right",
@@ -96,28 +115,46 @@ const ProductPage = () => {
       });
       return;
     }
-    dispatch(addItem({
-      id: product._id || product.id,
-      name: product.title,
-      price: numericPrice,
-      quantity: quantity,
-      img: product.image || product.img
-    }));
 
-    toast.success(`${quantity} x ${product.title} added to cart!`, {
-      position: "top-right",
-      autoClose: 2000,
-      style: {
-        background: "#ffffff",
-        color: "#000000",
-        fontWeight: "500",
-        border: "1px solid #e5e7eb",
-        borderRadius: "0.5rem",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
-      },
-      pauseOnHover: false,
-      draggable: true,
-    });
+    try {
+      await dispatch(addItemToCart(
+        product._id || product.id,
+        quantity,
+        numericPrice,
+        product.title,
+        product.image || product.img
+      ));
+
+      toast.success(`${quantity} x ${product.title} added to cart!`, {
+        position: "top-right",
+        autoClose: 2000,
+        style: {
+          background: "#ffffff",
+          color: "#000000",
+          fontWeight: "500",
+          border: "1px solid #e5e7eb",
+          borderRadius: "0.5rem",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+        },
+        pauseOnHover: false,
+        draggable: true,
+      });
+    } catch (error) {
+      toast.error("Failed to add item to cart. Please try again.", {
+        position: "top-right",
+        autoClose: 2000,
+        style: {
+          background: "#ffffff",
+          color: "#000000",
+          fontWeight: "500",
+          border: "1px solid #e5e7eb",
+          borderRadius: "0.5rem",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+        },
+        pauseOnHover: false,
+        draggable: true,
+      });
+    }
   };
 
   return (

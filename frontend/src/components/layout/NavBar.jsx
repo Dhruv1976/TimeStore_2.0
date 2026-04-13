@@ -68,14 +68,16 @@ const NavBar = () => {
                     <div className="flex gap-4 items-center relative">
                         <SearchButton onClick={handleSearch} className="hidden md:flex" />
 
-                        <div className="relative cursor-pointer" onClick={() => { setIsAccountOpen(false); setIsCartOpen(true); setIsMenuOpen(false); }}>
-                            <IoCartOutline className="text-2xl hover:scale-110 transition-transform duration-150" />
-                            {totalQuantity > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
-                                    {totalQuantity}
-                                </span>
-                            )}
-                        </div>
+                        {user && (
+                            <div className="relative cursor-pointer" onClick={() => { setIsAccountOpen(false); setIsCartOpen(true); setIsMenuOpen(false); }}>
+                                <IoCartOutline className="text-2xl hover:scale-110 transition-transform duration-150" />
+                                {totalQuantity > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg">
+                                        {totalQuantity}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         
                         <div className="relative" ref={accountRef}>
                             {user ? (
@@ -156,10 +158,12 @@ const NavBar = () => {
                 />
             </header>
 
-            <CartDrawer
-                isOpen={isCartOpen}
-                onClose={() => setIsCartOpen(false)}
-            />
+            {user && (
+                <CartDrawer
+                    isOpen={isCartOpen}
+                    onClose={() => setIsCartOpen(false)}
+                />
+            )}
         </>
     );
 };

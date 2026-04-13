@@ -9,9 +9,9 @@ const CartBody = ({ cartItems, onQuantityChange, onRemove }) => {
           Your cart is empty.
         </p>
       ) : (
-        cartItems.map((item) => (
+        cartItems.map((item, index) => (
           <CartItem
-            key={item.id}
+            key={item.id || `cart-item-${index}`}
             item={item}
             onQuantityChange={onQuantityChange}
             onRemove={onRemove}

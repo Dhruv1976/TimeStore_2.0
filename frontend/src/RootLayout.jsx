@@ -3,9 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import NavBar from './components/layout/NavBar'
 import { Outlet } from 'react-router-dom'
 import Footer from './components/layout/Footer'
-import apiClient from './services/apiClient'
-import { setCart } from './store/slices/cartSlice.js'
-import { initializeAuth } from './store/actions'
+import { initializeAuth, fetchCart } from './store/actions'
 
 const RootLayout = () => {
     const dispatch = useDispatch();
@@ -17,11 +15,7 @@ const RootLayout = () => {
 
     useEffect(() => {
         if (user?.id) {
-            apiClient.get('/cart')
-                .then(cart => {
-                    dispatch(setCart(cart));
-                })
-                .catch(err => console.error('Cart load error:', err));
+            dispatch(fetchCart());
         }
     }, [user?.id, dispatch]);
 

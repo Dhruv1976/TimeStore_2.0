@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "../store/slices/cartSlice";
+import { clearUserCart } from "../store/actions";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../services/apiClient";
 
@@ -77,7 +77,7 @@ const Checkout = () => {
 
       setOrderId(data.orderId);
 
-      dispatch(clearCart());
+      await dispatch(clearUserCart());
       setSubmitted(true);
     } catch (err) {
       setError(err.message || "Failed to place order");

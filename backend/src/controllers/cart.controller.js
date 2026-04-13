@@ -35,12 +35,15 @@ const addToCart = asyncHandler(async (req, res) => {
     cart.totalPrice = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     await cart.save();
 
+
+    cart = await cart.populate("items.productId", "title price image stock");
+
     res.status(200).json(new ApiResponse(200, cart, "Item added to cart"));
 });
 
 const getCart = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    const cart = await Cart.findOne({ userId }).populate("items.productId", "title price image");
+    const cart = await Cart.findOne({ userId }).populate("items.productId", "title price image stock");
     
     if (!cart) {
         return res.status(200).json(new ApiResponse(200, { items: [], totalQuantity: 0, totalPrice: 0 }, "Empty cart"));
@@ -62,6 +65,8 @@ const removeFromCart = asyncHandler(async (req, res) => {
     cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     cart.totalPrice = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     await cart.save();
+
+    await cart.populate("items.productId", "title price image stock");
 
     res.status(200).json(new ApiResponse(200, cart, "Item removed from cart"));
 });
@@ -85,6 +90,8 @@ const updateCartItem = asyncHandler(async (req, res) => {
     cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
     cart.totalPrice = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     await cart.save();
+
+    await cart.populate("items.productId", "title price image stock");
 
     res.status(200).json(new ApiResponse(200, cart, "Cart updated"));
 });

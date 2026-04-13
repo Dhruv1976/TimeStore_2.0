@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import CartHeader from "./CartHeader";
 import CartBody from "./CartBody";
 import CartFooter from "./CartFooter";
-import { removeItem, updateQuantity } from "../../../store/slices/cartSlice";
+import { removeItemFromCart, updateCartItemQuantity } from "../../../store/actions";
 import { useDispatch, useSelector } from "react-redux";
 
 const CartDrawer = ({ isOpen, onClose }) => {
@@ -17,12 +17,18 @@ const CartDrawer = ({ isOpen, onClose }) => {
     return () => document.body.classList.remove("overflow-hidden");
   }, [isOpen]);
 
-  const handleQuantityChange = (id, qty) => {
-    dispatch(updateQuantity({ id, quantity: qty }));
+  const handleQuantityChange = async (id, qty) => {
+    try {
+      await dispatch(updateCartItemQuantity(id, qty));
+    } catch (error) {
+    }
   };
 
-  const handleRemove = (id) => {
-    dispatch(removeItem(id));
+  const handleRemove = async (id) => {
+    try {
+      await dispatch(removeItemFromCart(id));
+    } catch (error) {
+    }
   };
 
   return (
