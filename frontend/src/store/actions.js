@@ -1,5 +1,5 @@
 import { loginSuccess, logout, authInitialized } from './slices/authSlice';
-import { setCart, clearCart } from './slices/cartSlice';
+import { setCart, clearCart, updateQuantity } from './slices/cartSlice';
 import apiClient from '../services/apiClient';
 
 const mapCartData = (cartData) => ({
@@ -100,6 +100,17 @@ export const updateCartItemQuantity = (productId, quantity) => async (dispatch) 
         dispatch(setCart(mapCartData(cartData)));
     } catch (error) {
         throw error;
+    }
+};
+
+export const updateCartItemQuantityOptimistic = (productId, quantity) => async (dispatch) => {
+    dispatch(updateQuantity({ id: productId, quantity }));
+    
+    try {
+        const cartData = await apiClient.put(`/cart/${productId}`, { quantity });
+        dispatch(setCart(mapCartData(cartData)));
+    } catch (error) {
+        console.error('Failed to update cart quantity:', error);
     }
 };
 

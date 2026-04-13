@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 const CartItem = ({ item, onQuantityChange, onRemove }) => {
   const [inputValue, setInputValue] = useState(item.quantity);
@@ -8,6 +8,19 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
     setInputValue(item.quantity);
     setImageError(false);
   }, [item.quantity, item.img]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (inputValue !== item.quantity && inputValue !== "") {
+        let value = parseInt(inputValue, 10);
+        if (!isNaN(value) && value >= 1) {
+          onQuantityChange(item.id, value);
+        }
+      }
+    }, 800); 
+
+    return () => clearTimeout(timer);
+  }, [inputValue, item.quantity, item.id, onQuantityChange]);
 
   const handleImageError = () => {
     setImageError(true);
@@ -27,16 +40,24 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
     if (/^\d*$/.test(value)) setInputValue(value);
   };
 
-  const submitValue = () => {
-    if (inputValue === "") return;
-    let value = parseInt(inputValue, 10);
-    if (isNaN(value) || value < 1) value = 1;
-    onQuantityChange(item.id, value);
+  const handleBlur = () => {
+    if (inputValue !== item.quantity.toString() && inputValue !== "") {
+      let value = parseInt(inputValue, 10);
+      if (!isNaN(value) && value >= 1) {
+        onQuantityChange(item.id, value);
+      }
+    }
   };
 
-  const handleBlur = () => submitValue();
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") submitValue();
+    if (e.key === "Enter") {
+      if (inputValue !== item.quantity.toString() && inputValue !== "") {
+        let value = parseInt(inputValue, 10);
+        if (!isNaN(value) && value >= 1) {
+          onQuantityChange(item.id, value);
+        }
+      }
+    }
   };
 
   return (

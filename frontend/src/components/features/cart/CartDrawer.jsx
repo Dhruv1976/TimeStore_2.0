@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import CartHeader from "./CartHeader";
 import CartBody from "./CartBody";
 import CartFooter from "./CartFooter";
-import { removeItemFromCart, updateCartItemQuantity } from "../../../store/actions";
+import { removeItemFromCart, updateCartItemQuantityOptimistic } from "../../../store/actions";
 import { useDispatch, useSelector } from "react-redux";
 
 const CartDrawer = ({ isOpen, onClose }) => {
@@ -19,7 +19,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
 
   const handleQuantityChange = async (id, qty) => {
     try {
-      await dispatch(updateCartItemQuantity(id, qty));
+      await dispatch(updateCartItemQuantityOptimistic(id, qty));
     } catch (error) {
     }
   };
